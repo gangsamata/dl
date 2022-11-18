@@ -1,0 +1,104 @@
+#
+import tensorflow as tf
+from keras import datasets, layers, models
+from keras.datasets import cifar10
+import matplotlib.pyplot as plt
+#
+# Load the dataset
+(trainX, trainY), (testX, testY) = cifar10.load_data()
+
+# Normalize pixel values to be between 0 and 1
+trainX, testX = trainX / 255.0, testX / 255.0
+#
+class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer',
+               'dog', 'frog', 'horse', 'ship', 'truck']
+#
+plt.figure(figsize=(10,10))
+for i in range(25):
+    plt.subplot(5,5,i+1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.grid(False)
+    plt.imshow(trainX[i])
+    # The CIFAR labels happen to be arrays, 
+    # which is why you need the extra index
+    plt.xlabel(class_names[trainY[i][0]])
+plt.show()
+#
+model = models.Sequential()
+model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+model.add(layers.MaxPooling2D((2, 2)))
+
+model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+
+model.add(layers.Flatten())
+
+model.add(layers.Dense(64, activation='relu'))
+model.add(layers.Dense(10, activation='softmax'))
+#
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+#
+history = model.fit(trainX, trainY, epochs=3,
+                   validation_data=(testX, testY))
+#
+model.evaluate(testX,testY)
+#
+plt.plot(history.history['accuracy'], label='accuracy')
+plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.ylim([0.5, 1])
+plt.legend(loc='lower right')
+
+test_loss, test_acc = model.evaluate(testX,  testY, verbose=2)
+#
+print(test_acc)
+#
+from keras.models import load_model 
+model.save('project_model.h5')
+#
+#loading the saved model 
+from keras.models import load_model 
+model = load_model('project_model.h5')
+#
+import numpy as np 
+from keras_preprocessing.image import load_img
+from keras_preprocessing.image import img_to_array
+# Give the link of the image here to test 
+test1 =load_img('/image1.jpg',target_size =(32,32))
+#
+test =img_to_array(test1) 
+test =np.expand_dims(test, axis =0) 
+result = model.predict(test) 
+print(result) 
+if result[0][0]==1: 
+    print("Aeroplane") 
+elif result[0][1]==1: 
+    print('Automobile') 
+elif result[0][2]==1: 
+    print('Bird') 
+elif result[0][3]==1: 
+    print('Cat') 
+elif result[0][4]==1: 
+    print('Deer') 
+elif result[0][5]==1: 
+    print('Dog') 
+elif result[0][6]==1: 
+    print('Frog') 
+elif result[0][7]==1: 
+    print('Horse') 
+elif result[0][8]==1: 
+    print('Ship') 
+elif result[0][9]==1: 
+    print('Truck') 
+else: 
+    print('Error')
+#
+%matplotlib inline 
+import matplotlib.pyplot as plt 
+plt.imshow(test1)
